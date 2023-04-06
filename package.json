@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/frankolszewski/lfggbot#readme",
   "dependencies": {
-    "discord.js": "^14.9.0"
+    "discord.js": "^14.9.0",
+    "node-cron": "^3.0.2"
   }
 }

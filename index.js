@@ -1,8 +1,10 @@
 // Require the necessary discord.js classes
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const { ActivityType, Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
+const cron = require('node-cron');
+const whitespace = ' ';
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -13,7 +15,7 @@ const commandFolders = fs.readdirSync(foldersPath);
 for (const folder of commandFolders) {
     const commandsPath = path.join(foldersPath, folder);
 	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-	
+
 	for (const file of commandFiles) {
 		const filePath = path.join(commandsPath, file);
 		const command = require(filePath);
@@ -30,7 +32,8 @@ for (const folder of commandFolders) {
 // When the client is ready, run this code (only once)
 // We use 'c' for the event parameter to keep it separate from the already defined 'client'
 client.once(Events.ClientReady, c => {
-	console.log(`Ready! Logged in as ${c.user.tag}`);
+	console.log(`[${new Date().toString()}] Ready! Logged in as ${c.user.tag}`);
+	c.user.setPresence({ activities: [{ type: ActivityType.Watching, name: 'for /lfg !' }], status: 'idle' });
 });
 
 client.on(Events.InteractionCreate, async interaction => {
@@ -54,5 +57,21 @@ client.on(Events.InteractionCreate, async interaction => {
 		}
 	}
 });
-// Log in to Discord with your client's token
+
 client.login(token);
+
+cron.schedule('*/30 */1 * * * *', async function() {
+	console.log(`[${new Date().toLocaleTimeString()}] Reaper started`);
+    const channel = client.channels.cache.get('1093328128736239706'); // TODO: hardcoded to #general, obviously not good.
+	console.log(`[${new Date().toLocaleTimeString()}] Reaper reading channel: #${channel.name}`);
+	
+	channel.threads.cache.filter(async thread => {
+		// TODO: Better define the checking criteria
+		if (thread.name.endsWith("game")) {
+			console.log(`[${new Date().toLocaleTimeString()}] Reaper deleting thread: ${thread.name}`);
+			await thread.delete();
+		}
+	});
+	
+	console.log(`[${new Date().toLocaleTimeString()}] Reaper done`);
+});

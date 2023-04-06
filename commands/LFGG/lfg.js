@@ -1,4 +1,4 @@
-const { ActionRowBuilder, Events, ModalBuilder, SlashCommandBuilder, TextInputBuilder, TextInputStyle, ButtonBuilder, ThreadAutoArchiveDuration } = require('discord.js');
+const { SlashCommandBuilder, ThreadAutoArchiveDuration } = require('discord.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
