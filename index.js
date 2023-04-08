@@ -4,7 +4,6 @@ const path = require('node:path');
 const { ActivityType, Client, Collection, Events, GatewayIntentBits } = require('discord.js');
 const { token } = require('./config.json');
 const cron = require('node-cron');
-const whitespace = ' ';
 
 // Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -60,16 +59,28 @@ client.on(Events.InteractionCreate, async interaction => {
 
 client.login(token);
 
-cron.schedule('*/30 */1 * * * *', async function() {
+const cronSeconds="*/30";
+const cronMinutes="*/1";
+const cronHours="*";
+const cronDayOfMonth="*";
+const cronMonth="*";
+const cronDayOfWeek="*";
+cron.schedule(`${cronSeconds} ${cronMinutes} ${cronHours} ${cronDayOfMonth} ${cronMonth} ${cronDayOfWeek}`, async function() {
 	console.log(`[${new Date().toLocaleTimeString()}] Reaper started`);
     const channel = client.channels.cache.get('1093328128736239706'); // TODO: hardcoded to #general, obviously not good.
 	console.log(`[${new Date().toLocaleTimeString()}] Reaper reading channel: #${channel.name}`);
 	
 	channel.threads.cache.filter(async thread => {
-		// TODO: Better define the checking criteria
-		if (thread.name.endsWith("game")) {
+		
+		if (thread.name.endsWith("game")
+			// TODO: Better define the checking criteria
+		) {
 			console.log(`[${new Date().toLocaleTimeString()}] Reaper deleting thread: ${thread.name}`);
-			await thread.delete();
+			try {
+				await thread.delete();
+			} catch (error) {
+				console.error(error);
+			}
 		}
 	});
 	
