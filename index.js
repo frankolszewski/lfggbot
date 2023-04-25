@@ -40,11 +40,14 @@ client.on(Events.InteractionCreate, async interaction => {
 		// https://discordjs.guide/interactions/modals.html#responding-to-modal-submissions
 		let game = interaction.fields.getTextInputValue("game");
 		let players = interaction.fields.getTextInputValue("playerCount");
+		const hammertime = interaction.fields.getTextInputValue("hammertime");
+
 		if (!players) {
 			players = "anyone!";
 		}
+
 		const thread = await interaction.channel.threads.create({
-			name: `${interaction.user.username}'s ${game} game - looking for ${players}`,
+			name: `${interaction.user.username}'s ${game} game thread`,
 			autoArchiveDuration: ThreadAutoArchiveDuration.OneHour, // This is for inactivity in the thread!
 			reason: `${interaction.member}'s ${game} thread!`});
 		await thread.join();
@@ -59,7 +62,12 @@ client.on(Events.InteractionCreate, async interaction => {
 			game = interaction.guild.roles.cache.find((role) => role.name === roleTag);
 		}
 
-		await thread.send(`${interaction.member} is looking for ${players} for ${game}`)
+		let message = `${interaction.member} is looking to play ${game}`;
+		if (hammertime) {
+			message += ` at ${hammertime}`;
+		}
+
+		await thread.send(`${message} with ${players}`)
 			.then(console.log)
 			.catch(console.error);
 		
@@ -106,7 +114,7 @@ cron.schedule(`${cronSeconds} ${cronMinutes} ${cronHours} ${cronDayOfMonth} ${cr
 
 	channel.threads.cache.filter(async thread => {
 		console.log(`Reading ${thread}`);
-		if (thread.name.includes("game - ")
+		if (thread.name.endsWith("game thread")
 			// TODO: Better define the checking criteria
 		) {
 			console.log(`[${new Date().toLocaleTimeString()}] Reaper deleting thread: ${thread.name}`);
