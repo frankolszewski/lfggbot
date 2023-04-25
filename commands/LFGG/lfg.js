@@ -1,26 +1,30 @@
-const { SlashCommandBuilder, ThreadAutoArchiveDuration } = require('discord.js');
+const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('lfg')
-		.setDescription('Looking for group!')
-		.addStringOption(option =>
-			option.setName("game")
-			.setDescription("Game")
-			.setRequired(true))
-		.addStringOption(option =>
-			option.setName("players")
-			.setDescription("Player count")
-			.setRequired(false)),
+		.setDescription('Looking for group!'),
 	async execute(interaction) {
-		const game = interaction.options.getString("game");
-		const players = interaction.options.getString("players") ?? "Anyone!";
-		await interaction.reply({ content: `${interaction.member} is looking for ${players} for ${game}!`, ephemeral: false });
+		const modal = new ModalBuilder()
+			.setCustomId("lfgModal")
+			.setTitle("Looking For Gaming Group!");
 
-		const thread = await interaction.channel.threads.create({
-			name: `${interaction.user.username}'s ${game} game`,
-			autoArchiveDuration: ThreadAutoArchiveDuration.OneHour, // This is for inactivity in the thread!
-			reason: `${interaction.member}'s ${game} thread!`});
-		
+		const gameInput = new TextInputBuilder()
+			.setCustomId('game')
+		    // The label is the prompt the user sees for this input
+			.setLabel("What game or role (e.g. @apex)?")
+		    // Short means only a single line of text
+			.setStyle(TextInputStyle.Short);
+
+		const playerInput = new TextInputBuilder()
+			.setCustomId('playerCount')
+			.setLabel("Number of players?")
+			.setRequired(false)
+			.setStyle(TextInputStyle.Short);
+
+		const firstActionRow = new ActionRowBuilder().addComponents(gameInput);
+		const secondActionRow = new ActionRowBuilder().addComponents(playerInput);
+		modal.addComponents(firstActionRow, secondActionRow);
+		await interaction.showModal(modal);		
 	},
 };

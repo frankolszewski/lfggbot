@@ -1,7 +1,7 @@
 // Require the necessary discord.js classes
 const fs = require('node:fs');
 const path = require('node:path');
-const { ActivityType, Client, Collection, Events, GatewayIntentBits } = require('discord.js');
+const { ActivityType, Client, Collection, Events, GatewayIntentBits, ThreadAutoArchiveDuration } = require('discord.js');
 const { token } = require('./config.json');
 const cron = require('node-cron');
 
@@ -36,6 +36,36 @@ client.once(Events.ClientReady, c => {
 });
 
 client.on(Events.InteractionCreate, async interaction => {
+	if (interaction.customId === 'lfgModal' && interaction.isModalSubmit()) {
+		// https://discordjs.guide/interactions/modals.html#responding-to-modal-submissions
+		let game = interaction.fields.getTextInputValue("game");
+		let players = interaction.fields.getTextInputValue("playerCount");
+		if (!players) {
+			players = "anyone!";
+		}
+		const thread = await interaction.channel.threads.create({
+			name: `${interaction.user.username}'s ${game} game - looking for ${players}`,
+			autoArchiveDuration: ThreadAutoArchiveDuration.OneHour, // This is for inactivity in the thread!
+			reason: `${interaction.member}'s ${game} thread!`});
+		await thread.join();
+
+
+		if (game.startsWith("@")) {
+			let roleTag = game.replace("@", "");
+
+			console.debug(`Looking for role: ${roleTag}`);
+			console.debug(`Roles: ${interaction.guild.roles.cache.size}`);
+
+			game = interaction.guild.roles.cache.find((role) => role.name === roleTag);
+		}
+
+		await thread.send(`${interaction.member} is looking for ${players} for ${game}`)
+			.then(console.log)
+			.catch(console.error);
+		
+		await interaction.reply({content: "Happy gaming :)", ephemeral: true});
+		return;
+	}
 	if (!interaction.isChatInputCommand()) return;
 
 	const command = interaction.client.commands.get(interaction.commandName);
@@ -46,6 +76,8 @@ client.on(Events.InteractionCreate, async interaction => {
 	}
 
 	try {
+		console.log(interaction);
+	
 		await command.execute(interaction);
 	} catch (error) {
 		console.error(error);
@@ -60,19 +92,21 @@ client.on(Events.InteractionCreate, async interaction => {
 client.login(token);
 
 const cronSeconds="*/30";
-const cronMinutes="*/1";
+const cronMinutes="*";
 const cronHours="*";
 const cronDayOfMonth="*";
 const cronMonth="*";
 const cronDayOfWeek="*";
 cron.schedule(`${cronSeconds} ${cronMinutes} ${cronHours} ${cronDayOfMonth} ${cronMonth} ${cronDayOfWeek}`, async function() {
 	console.log(`[${new Date().toLocaleTimeString()}] Reaper started`);
-    const channel = client.channels.cache.get('1093328128736239706'); // TODO: hardcoded to #general, obviously not good.
+
+    const channel = client.channels.cache.get('1100438426869833809'); // TODO: hardcoded to #general, obviously not good.
+
 	console.log(`[${new Date().toLocaleTimeString()}] Reaper reading channel: #${channel.name}`);
-	
+
 	channel.threads.cache.filter(async thread => {
-		
-		if (thread.name.endsWith("game")
+		console.log(`Reading ${thread}`);
+		if (thread.name.includes("game - ")
 			// TODO: Better define the checking criteria
 		) {
 			console.log(`[${new Date().toLocaleTimeString()}] Reaper deleting thread: ${thread.name}`);
