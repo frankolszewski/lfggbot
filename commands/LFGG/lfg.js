@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
+const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, SelectMenuBuilder, ComponentBuilder } = require('discord.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -11,20 +11,31 @@ module.exports = {
 
 		const gameInput = new TextInputBuilder()
 			.setCustomId('game')
-		    // The label is the prompt the user sees for this input
 			.setLabel("What game or role (e.g. @apex)?")
-		    // Short means only a single line of text
+			.setMaxLength(100)
+			.setMinLength(1)
 			.setStyle(TextInputStyle.Short);
 
 		const playerInput = new TextInputBuilder()
 			.setCustomId('playerCount')
 			.setLabel("Number of players?")
 			.setRequired(false)
+			.setMinLength(1)
+			.setMaxLength(100)
+			.setStyle(TextInputStyle.Short);
+
+		const hammertimeInput = new TextInputBuilder()
+			.setCustomId("hammertime")
+			.setLabel("Play time (see: https://hammertime.cyou)")
+			.setRequired(false)
+			.setMinLength(1)
+			.setMaxLength(50)
 			.setStyle(TextInputStyle.Short);
 
 		const firstActionRow = new ActionRowBuilder().addComponents(gameInput);
 		const secondActionRow = new ActionRowBuilder().addComponents(playerInput);
-		modal.addComponents(firstActionRow, secondActionRow);
+		const thirdActionRow = new ActionRowBuilder().addComponents(hammertimeInput);
+		modal.addComponents(firstActionRow, secondActionRow, thirdActionRow);
 		await interaction.showModal(modal);		
 	},
 };
