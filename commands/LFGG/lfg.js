@@ -11,14 +11,14 @@ module.exports = {
 
 		const gameInput = new TextInputBuilder()
 			.setCustomId('game')
-			.setLabel("What game or role (e.g. @apex)?")
+			.setLabel("🕹️ What game OR role (e.g. @apex)?")
 			.setMaxLength(100)
 			.setMinLength(1)
 			.setStyle(TextInputStyle.Short);
 
 		const playerInput = new TextInputBuilder()
 			.setCustomId('playerCount')
-			.setLabel("Number of players?")
+			.setLabel("👥 Number of players?")
 			.setRequired(false)
 			.setMinLength(1)
 			.setMaxLength(100)
@@ -26,7 +26,7 @@ module.exports = {
 
 		const hammertimeInput = new TextInputBuilder()
 			.setCustomId("hammertime")
-			.setLabel("Play time (see: https://hammertime.cyou)")
+			.setLabel("⏲️ When? (see: https://hammertime.cyou)")
 			.setRequired(false)
 			.setMinLength(1)
 			.setMaxLength(50)
