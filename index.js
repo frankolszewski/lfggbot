@@ -32,7 +32,7 @@ for (const folder of commandFolders) {
 // We use 'c' for the event parameter to keep it separate from the already defined 'client'
 client.once(Events.ClientReady, c => {
 	console.log(`[${new Date().toString()}] Ready! Logged in as ${c.user.tag}`);
-	c.user.setPresence({ activities: [{ type: ActivityType.Watching, name: 'for /lfg !' }], status: 'idle' });
+	c.user.setPresence({ activities: [{ type: ActivityType.Watching, name: 'for /lfg' }], status: 'active' });
 });
 
 client.on(Events.InteractionCreate, async interaction => {
